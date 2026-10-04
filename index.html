@@ -5,222 +5,197 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cloud Phone Dashboard</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: #090d16; color: #f8fafc; display: flex; height: 100vh; overflow: hidden; }
 
-    body {
-      background: #090d16;
-      color: #f8fafc;
-      display: flex;
-      height: 100vh;
-      overflow: hidden;
-    }
+    /* Боковая панель */
+    .sidebar { width: 380px; background: #111827; padding: 20px; display: flex; flex-direction: column; border-right: 1px solid #1f2937; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .brand { font-size: 18px; font-weight: 800; color: #38bdf8; }
+    
+    .btn-add { background: #0284c7; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+    .btn-add:hover { background: #0369a1; }
 
-    /* Левая панель управления */
-    .sidebar {
-      width: 340px;
-      background: #111827;
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      border-right: 1px solid #1f2937;
-    }
+    /* Список телефонов */
+    .device-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; padding-right: 4px; }
+    .device-card { background: #1f2937; padding: 16px; border-radius: 12px; border: 1px solid #374151; display: flex; flex-direction: column; gap: 10px; }
+    .card-top { display: flex; justify-content: space-between; align-items: center; }
+    .status-badge { padding: 3px 8px; border-radius: 9999px; font-size: 11px; font-weight: 600; background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); }
+    .device-name { font-size: 16px; font-weight: 700; color: #f3f4f6; }
+    .device-meta { font-size: 12px; color: #9ca3af; line-height: 1.5; }
+    .device-meta span { color: #e5e7eb; font-weight: 500; }
 
-    .brand {
-      font-size: 20px;
-      font-weight: 800;
-      letter-spacing: 0.5px;
-      color: #38bdf8;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+    .card-actions { display: flex; gap: 8px; margin-top: 4px; }
+    .btn-launch { flex: 1; padding: 10px; background: #0284c7; color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .btn-launch:hover { background: #0369a1; }
+    .btn-delete { padding: 10px 12px; background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; font-size: 12px; cursor: pointer; }
+    .btn-delete:hover { background: rgba(239, 68, 68, 0.25); }
 
-    .card {
-      background: #1f2937;
-      padding: 20px;
-      border-radius: 14px;
-      border: 1px solid #374151;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
+    /* Центральная область */
+    .viewport { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #030712; text-align: center; gap: 12px; }
+    .placeholder-title { font-size: 20px; font-weight: 600; color: #f8fafc; }
+    .placeholder-desc { color: #64748b; font-size: 14px; max-width: 400px; line-height: 1.5; }
 
-    .status-badge {
-      align-self: flex-start;
-      padding: 4px 10px;
-      border-radius: 9999px;
-      font-size: 12px;
-      font-weight: 600;
-      background: rgba(34, 197, 94, 0.15);
-      color: #4ade80;
-      border: 1px solid rgba(34, 197, 94, 0.3);
-    }
-
-    .device-info {
-      font-size: 13px;
-      color: #9ca3af;
-      line-height: 1.6;
-    }
-
-    .device-info span {
-      color: #f3f4f6;
-      font-weight: 500;
-    }
-
-    .btn-primary {
-      width: 100%;
-      padding: 14px;
-      background: #0284c7;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s, transform 0.1s;
-    }
-
-    .btn-primary:hover {
-      background: #0369a1;
-    }
-
-    .btn-primary:active {
-      transform: scale(0.98);
-    }
-
-    .btn-secondary {
-      width: 100%;
-      padding: 10px;
-      background: transparent;
-      color: #94a3b8;
-      border: 1px solid #334155;
-      border-radius: 8px;
-      font-size: 13px;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: none;
-    }
-
-    .btn-secondary:hover {
-      background: #1e293b;
-      color: #f8fafc;
-    }
-
-    /* Правая часть: вьюпорт с телефоном */
-    .viewport {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #030712;
-      position: relative;
-    }
-
-    .placeholder-box {
-      text-align: center;
-      color: #64748b;
-    }
-
-    .placeholder-box p {
-      margin-top: 8px;
-      font-size: 14px;
-    }
-
-    /* Рамка экрана телефона */
-    .phone-container {
-      width: 400px;
-      height: 820px;
-      background: #000;
-      border-radius: 40px;
-      border: 10px solid #1f2937;
-      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.9), 0 0 0 1px #374151;
-      overflow: hidden;
-      display: none;
-      position: relative;
-    }
-
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-      background: #000;
-    }
+    /* Модальное окно добавления */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7); display: none; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(4px); }
+    .modal { background: #1e293b; padding: 24px; border-radius: 14px; width: 360px; border: 1px solid #334155; display: flex; flex-direction: column; gap: 14px; }
+    .modal h3 { font-size: 18px; color: #f8fafc; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; text-align: left; }
+    .form-group label { font-size: 12px; color: #94a3b8; }
+    .form-group input { background: #0f172a; border: 1px solid #334155; padding: 10px 12px; border-radius: 8px; color: #fff; font-size: 14px; outline: none; }
+    .form-group input:focus { border-color: #38bdf8; }
+    .modal-buttons { display: flex; gap: 10px; margin-top: 8px; }
+    .btn-save { flex: 1; padding: 10px; background: #0284c7; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    .btn-cancel { flex: 1; padding: 10px; background: #334155; color: #cbd5e1; border: none; border-radius: 8px; cursor: pointer; }
   </style>
 </head>
 <body>
 
-  <!-- Боковая панель -->
+  <!-- Боковая панель со списком -->
   <div class="sidebar">
-    <div class="brand">⚡ Cloud Phone Farm</div>
+    <div class="header">
+      <div class="brand">⚡ Cloud Farm</div>
+      <button class="btn-add" onclick="openModal()">+ Добавить</button>
+    </div>
 
-    <div class="card">
-      <div class="status-badge">● Онлайн</div>
-      <h2>Pixel Cloud #1</h2>
-      
-      <div class="device-info">
-        ID: <span>1530814588</span><br>
-        Локация: <span>США</span><br>
-        ОС: <span>Android</span>
-      </div>
-
-      <button id="btnLaunch" class="btn-primary" onclick="launchPhone()">
-        Запустить телефон
-      </button>
-
-      <button id="btnNewTab" class="btn-secondary" onclick="openFullscreen()">
-        ↗ Открыть в новой вкладке
-      </button>
+    <div id="deviceList" class="device-list">
+      <!-- Сюда динамически добавляются карточки телефонов -->
     </div>
   </div>
 
-  <!-- Рабочая область экрана -->
+  <!-- Рабочая область -->
   <div class="viewport">
-    <div id="emptyState" class="placeholder-box">
-      <h3>Устройство свободно</h3>
-      <p>Нажмите «Запустить телефон», чтобы начать сессию управления</p>
-    </div>
+    <div class="placeholder-title">Панель управления фермой</div>
+    <div class="placeholder-desc">Выберите телефон слева и нажмите «Запустить», чтобы открыть рабочую сессию.</div>
+  </div>
 
-    <div id="phoneBox" class="phone-container">
-      <iframe 
-        id="phoneStream" 
-        src="" 
-        allow="autoplay; fullscreen; clipboard-read; clipboard-write">
-      </iframe>
+  <!-- Модальное окно добавления устройства -->
+  <div id="modalOverlay" class="modal-overlay">
+    <div class="modal">
+      <h3>Добавить телефон</h3>
+      
+      <div class="form-group">
+        <label>Название телефона</label>
+        <input type="text" id="phoneName" placeholder="Например: Pixel Cloud #2">
+      </div>
+
+      <div class="form-group">
+        <label>Remote ID (без пробелов)</label>
+        <input type="text" id="phoneId" placeholder="1530814588">
+      </div>
+
+      <div class="form-group">
+        <label>Постоянный пароль</label>
+        <input type="text" id="phonePassword" placeholder="Fenom1234">
+      </div>
+
+      <div class="modal-buttons">
+        <button class="btn-save" onclick="saveDevice()">Сохранить</button>
+        <button class="btn-cancel" onclick="closeModal()">Отмена</button>
+      </div>
     </div>
   </div>
 
   <script>
-    // Адрес веб-клиента с авто-подключением по твоему ID и паролю
-    // Если развернут собственный сервер — замени rustdesk.com на домен/IP своего VPS
-    const targetUrl = "https://rustdesk.com/web/#/connect?id=1530814588&password=Fenom1234";
+    // Начальный список (по умолчанию будет первый телефон)
+    const defaultDevices = [
+      { id: '1530814588', name: 'Pixel Cloud #1', password: 'Fenom1234', location: 'США' }
+    ];
 
-    function launchPhone() {
-      // Прячем заглушку и показываем рамку устройства
-      document.getElementById('emptyState').style.display = 'none';
-      document.getElementById('phoneBox').style.display = 'block';
-      document.getElementById('btnNewTab').style.display = 'block';
+    // Загрузка устройств из хранилища браузера
+    function getDevices() {
+      const data = localStorage.getItem('cloud_devices');
+      return data ? JSON.parse(data) : defaultDevices;
+    }
 
-      // Меняем статус кнопки
-      const btn = document.getElementById('btnLaunch');
-      btn.innerText = "Подключено";
-      btn.style.background = "#15803d";
+    // Сохранение списка в хранилище
+    function setDevices(devices) {
+      localStorage.setItem('cloud_devices', JSON.stringify(devices));
+      renderDevices();
+    }
 
-      // Загружаем стрим в iframe
-      const frame = document.getElementById('phoneStream');
-      if (frame.src !== targetUrl) {
-        frame.src = targetUrl;
+    // Отрисовка списка устройств на странице
+    function renderDevices() {
+      const list = document.getElementById('deviceList');
+      const devices = getDevices();
+      list.innerHTML = '';
+
+      devices.forEach((dev, index) => {
+        const card = document.createElement('div');
+        card.className = 'device-card';
+        card.innerHTML = `
+          <div class="card-top">
+            <div class="device-name">${dev.name}</div>
+            <div class="status-badge">● Онлайн</div>
+          </div>
+          <div class="device-meta">
+            ID: <span>${dev.id}</span><br>
+            Локация: <span>${dev.location || 'США'}</span>
+          </div>
+          <div class="card-actions">
+            <button class="btn-launch" onclick="launchSession('${dev.id}', '${dev.password}')">Запустить</button>
+            <button class="btn-delete" onclick="deleteDevice(${index})">Удалить</button>
+          </div>
+        `;
+        list.appendChild(card);
+      });
+    }
+
+    // Запуск сессии в отдельном окне нужного размера
+    function launchSession(id, password) {
+      const targetUrl = `https://rustdesk.com/web/#/connect?id=${id}&password=${password}`;
+      const width = 450;
+      const height = 850;
+      const left = (window.screen.width / 2) - (width / 2);
+      const top = (window.screen.height / 2) - (height / 2);
+
+      window.open(
+        targetUrl,
+        'CloudPhone_' + id,
+        `width=${width},height=${height},top=${top},left=${left},status=no,menubar=no,toolbar=no`
+      );
+    }
+
+    // Открытие / закрытие модалки
+    function openModal() {
+      document.getElementById('modalOverlay').style.display = 'flex';
+      document.getElementById('phoneName').value = '';
+      document.getElementById('phoneId').value = '';
+      document.getElementById('phonePassword').value = '';
+    }
+
+    function closeModal() {
+      document.getElementById('modalOverlay').style.display = 'none';
+    }
+
+    // Сохранение нового телефона
+    function saveDevice() {
+      const name = document.getElementById('phoneName').value.trim() || 'Android Phone';
+      const id = document.getElementById('phoneId').value.trim();
+      const password = document.getElementById('phonePassword').value.trim();
+
+      if (!id || !password) {
+        alert('Пожалуйста, укажите ID и пароль');
+        return;
+      }
+
+      const devices = getDevices();
+      devices.push({ id, name, password, location: 'США' });
+      setDevices(devices);
+      closeModal();
+    }
+
+    // Удаление телефона
+    function deleteDevice(index) {
+      if (confirm('Удалить этот телефон из списка?')) {
+        const devices = getDevices();
+        devices.splice(index, 1);
+        setDevices(devices);
       }
     }
 
-    function openFullscreen() {
-      window.open(targetUrl, '_blank');
-    }
+    // Первичная отрисовка при загрузке
+    renderDevices();
   </script>
 </body>
 </html>
